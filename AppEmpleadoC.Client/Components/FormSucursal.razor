@@ -1,0 +1,93 @@
+﻿@inject NavigationManager NavigationManager
+@inject SucursalService sucursalService
+@inject EmpleadoService empleadoService
+@using AppEmpleadosC.Entities
+<h2>@titulo</h2>
+<EditForm Model="@oSucursalFormCLS" OnValidSubmit="@guardar">
+    <DataAnnotationsValidator />
+
+    <div class="mt-3">
+        <label>Código Sucursal</label>
+        <InputNumber class="form-control" @bind-Value="oSucursalFormCLS.CodigoSucursal" />
+        <ValidationMessage For="@(() => oSucursalFormCLS.CodigoSucursal)" />
+    </div>
+
+    <div class="mt-3">
+        <label>Ciudad</label>
+        <InputText class="form-control" @bind-Value="oSucursalFormCLS.Ciudad" />
+        <ValidationMessage For="@(() => oSucursalFormCLS.Ciudad)" />
+    </div>
+
+    <div class="mt-3">
+        <label>Región</label>
+        <InputText class="form-control" @bind-Value="oSucursalFormCLS.Region" />
+        <ValidationMessage For="@(() => oSucursalFormCLS.Region)" />
+    </div>
+
+    <div class="mt-3">
+        <label>Director (Rep de Ventas)</label>
+        <InputSelect class="form-control" @bind-Value="oSucursalFormCLS.Num_Empl_Director">
+            <option value="0">-- Seleccione --</option>
+            @foreach (var empleado in listarDirectores)
+            {
+                <option value="@empleado.Num_Empl">@empleado.Nombre</option>
+            }
+        </InputSelect>
+        <ValidationMessage For="@(() => oSucursalFormCLS.Num_Empl_Director)" />
+    </div>
+
+    <div class="mt-3">
+        <label>Objetivo de Venta</label>
+        <InputNumber class="form-control" @bind-Value="oSucursalFormCLS.ObjetivoVenta" />
+        <ValidationMessage For="@(() => oSucursalFormCLS.ObjetivoVenta)" />
+    </div>
+
+    <div class="mt-3">
+        <label>Ventas Reales</label>
+        <InputNumber class="form-control" @bind-Value="oSucursalFormCLS.VentasReales" />
+        <ValidationMessage For="@(() => oSucursalFormCLS.VentasReales)" />
+    </div>
+
+    <div class="mt-3">
+        <button type="submit" class="btn btn-success">Guardar</button>
+        <button type="button" class="btn btn-danger" @onclick="regresar">Regresar</button>
+    </div>
+</EditForm>
+
+@code {
+    public SucursalFormCLS oSucursalFormCLS { get; set; } = new SucursalFormCLS();
+    [Parameter]
+    public int CodigoSucursal { get; set; }
+    public string titulo { get; set; } = "";
+    public List<EmpleadoListCLS> listarDirectores { get; set; } = new List<EmpleadoListCLS>();
+
+    protected override Task OnInitializedAsync()
+    {
+        listarDirectores = empleadoService.listarEmpleados().Where(e => e.Cargo == "Director").ToList();
+
+        if (CodigoSucursal == 0)
+        {
+            titulo = "Agregar Sucursal";
+        }
+        else
+        {
+            titulo = "Editar Sucursal";
+            oSucursalFormCLS = sucursalService.recuperarSucursalPorId(CodigoSucursal);
+        }
+        return base.OnInitializedAsync();
+    }
+
+    private void guardar()
+    {
+        if(titulo == "Agregar Sucursal")
+        {
+            sucursalService.guardarSucursal(oSucursalFormCLS);
+            NavigationManager.NavigateTo("/sucursal");
+        }
+    }
+
+    private void regresar()
+    {
+        NavigationManager.NavigateTo("/sucursal");
+    }
+}

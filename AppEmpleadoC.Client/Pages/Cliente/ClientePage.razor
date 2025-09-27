@@ -1,0 +1,101 @@
+﻿@page "/cliente"
+@using AppEmpleadosC.Entities
+@inject NavigationManager NavigationManager
+@inject ClienteService ClienteService
+<h3>Clientes</h3>
+<div>
+    <button @onclick="nuevo" class="btn btn-primary">Nuevo Cliente</button>
+</div>
+<div class="input-group">
+    <input type="text" class="form-control" placeholder="Ingrese el nombre del Cliente"
+           @bind-value="nombre" @bind-value:event="oninput" aria-label="Recipient's username" aria-describedby="basic-addon2">
+    <div class="input-group-append">
+        <button @onclick="buscar" class="btn btn-outline-dark" type="button">Buscar</button>
+        <button @onclick="limpiar" class="btn btn-outline-danger" type="button">Limpiar</button>
+    </div>
+</div>
+@if (lista != null && lista.Count != 0)
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>CodigoCliente</th>
+                <th>NombreCliente</th>
+                <th>Representante</th>
+                <th>LimiteCredito</th>
+                <th>Operaciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in lista)
+            {
+                <tr>
+                    <td>@item.CodigoCliente</td>
+                    <td>@item.NombreCliente</td>
+                    <td>@item.Representante</td>
+                    <td>@item.LimiteCredito</td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="(() => recuperarCliente(item.CodigoCliente))">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pen-fill" viewBox="0 0 16 16">
+                                <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001" />
+                            </svg>
+                        </button>
+                        <button class="btn btn-danger" @onclick="(() => eliminarCliente(item.CodigoCliente))">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
+                                <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7A.5.5 0 0 1 8 5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0" />
+                            </svg>
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+@code {
+    private void limpiar()
+    {
+        nombre = "";
+        lista = ClienteService.filtrarClientes(nombre);
+    }
+
+    public string nombre { get; set; } = string.Empty;
+    private void buscar()
+    {
+        lista = ClienteService.filtrarClientes(nombre);
+    }
+
+    public List<ClienteListCLS> lista { get; set; } = new List<ClienteListCLS>();
+    protected override Task OnInitializedAsync()
+    {
+        ClienteService.OnSearch += filtrar;
+        listarClientes();
+        return base.OnInitializedAsync();
+    }
+    private Task filtrar(string nombre)
+    {
+        lista = ClienteService.filtrarClientes(nombre);
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+    private void listarClientes()
+    {
+        lista = ClienteService.listarClientes();
+    }
+    private void navegar() 
+    {
+        NavigationManager.NavigateTo("/formCliente");
+    }   
+    private void recuperarCliente(int CodigoCliente) 
+    {
+        NavigationManager.NavigateTo("/formCliente/edit/" + CodigoCliente);
+    }
+    private void eliminarCliente(int CodigoCliente)
+    {
+        ClienteService.eliminarCliente(CodigoCliente);
+        listarClientes();
+    }
+    private void nuevo()
+    {
+        NavigationManager.NavigateTo("/formCliente");
+    }
+}

@@ -1,0 +1,108 @@
+﻿@inject NavigationManager navigationManager
+@inject EmpleadoService empleadoService
+@inject SucursalService sucursalService
+@inject DirectorService directorioService
+@using AppEmpleadosC.Entities;
+<h2>@titulo</h2>
+<EditForm Model="@oEmpleadoFormCLS" OnValidSubmit="@guardar">
+    <DataAnnotationsValidator />
+
+    <div class="mt-3">
+        <label>Número de Empleado</label>
+        <InputNumber class="form-control" @bind-Value="oEmpleadoFormCLS.Num_Empl" />
+        <ValidationMessage For="@(() => oEmpleadoFormCLS.Num_Empl)" />
+    </div>
+
+    <div class="mt-3">
+        <label>Nombre</label>
+        <InputText class="form-control" @bind-Value="oEmpleadoFormCLS.Nombre" />
+        <ValidationMessage For="@(() => oEmpleadoFormCLS.Nombre)" />
+    </div>
+
+    <div class="mt-3">
+        <label>Edad</label>
+        <InputNumber class="form-control" @bind-Value="oEmpleadoFormCLS.Edad" />
+        <ValidationMessage For="@(() => oEmpleadoFormCLS.Edad)" />
+    </div>
+
+    <div class="mt-3">
+        <label>Cargo</label>
+        <InputText class="form-control" @bind-Value="oEmpleadoFormCLS.Cargo" />
+        <ValidationMessage For="@(() => oEmpleadoFormCLS.Cargo)" />
+    </div>
+
+    <div class="mt-3">
+        <label>Fecha de Contrato</label>
+        <InputDate class="form-control" @bind-Value="oEmpleadoFormCLS.FechaContrato" />
+        <ValidationMessage For="@(() => oEmpleadoFormCLS.FechaContrato)" />
+    </div>
+
+    <div class="mt-3">
+        <label>Cuota</label>
+        <InputNumber class="form-control" @bind-Value="oEmpleadoFormCLS.Cuota" />
+        <ValidationMessage For="@(() => oEmpleadoFormCLS.Cuota)" />
+    </div>
+
+    <div class="mt-3">
+        <label>Ventas</label>
+        <InputNumber class="form-control" @bind-Value="oEmpleadoFormCLS.Ventas" />
+        <ValidationMessage For="@(() => oEmpleadoFormCLS.Ventas)" />
+    </div>
+    <div class="mt-3">
+        <label>Sucursal</label>
+        <InputSelect class="form-control" @bind-Value="oEmpleadoFormCLS.CodigoSucursal">
+            <option value="">-- Seleccione --</option>
+            @foreach (var sucursal in listaSucursal)
+            {
+                <option value="@sucursal.CodigoSucursal">@sucursal.Ciudad</option>
+            }
+        </InputSelect>
+       </div> 
+       <div class="mt-3">
+        <label>Director</label>
+        <InputSelect class="form-control" @bind-Value="oEmpleadoFormCLS.idDirector">
+            <option value="">-- Seleccione --</option>
+            @foreach (var director in listaDirector)
+            {
+                <option value="@director.idDirector">@director.nombreDirector</option>
+            }
+        </InputSelect>
+    </div>
+    <div class="mt-3">
+        <button type="submit" class="btn btn-success" @onclick="@guardar">Guardar</button>
+        <button type="button" class="btn btn-danger" @onclick="@regresar">Regresar</button>
+    </div>
+</EditForm>
+@code {
+    public EmpleadoFormCLS oEmpleadoFormCLS { get; set; } = new EmpleadoFormCLS();
+    [Parameter]
+    public int Num_Empl { get; set; }
+
+    public string titulo { get; set; } = "";
+    public List<SucursalCLS> listaSucursal { get; set; } = new List<SucursalCLS>(); 
+    public List<DirectorCLS> listaDirector { get; set; } = new List<DirectorCLS>();
+    protected override Task OnInitializedAsync()
+    {
+        listaSucursal = sucursalService.listarSucursal();  
+        listaDirector = directorioService.listarDirector(); 
+        if (Num_Empl == 0) titulo = "Agregar Empleado";
+        else
+        {
+            titulo = "Editar Empleado";
+            oEmpleadoFormCLS = empleadoService.recuperarEmpleadoPorId(Num_Empl);
+        }
+        return base.OnInitializedAsync();
+    }
+    private void guardar()
+    {
+        if (titulo == "Agregar Empleado")
+        {
+            empleadoService.guardarEmpleado(oEmpleadoFormCLS);
+            navigationManager.NavigateTo("/Empleado");
+        }
+    }
+    private void regresar()
+    {
+        navigationManager.NavigateTo("/Empleado");
+    }
+}

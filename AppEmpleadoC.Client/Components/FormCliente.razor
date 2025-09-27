@@ -1,0 +1,75 @@
+﻿@inject NavigationManager NavigationManager;
+@inject ClienteService clienteService;
+@inject EmpleadoService empleadoService;
+@using AppEmpleadosC.Entities
+<h2>@titulo</h2>
+<EditForm Model="@oClienteFormCLS" OnValidSubmit="@guardar">
+    <DataAnnotationsValidator />
+
+    <div class="mt-3">
+        <label>Número de Cliente</label>
+        <InputNumber class="form-control" @bind-Value="oClienteFormCLS.CodigoCliente" />
+        <ValidationMessage For="@(() => oClienteFormCLS.CodigoCliente)" />
+    </div>
+
+    <div class="mt-3">
+        <label>Nombre</label>
+        <InputText class="form-control" @bind-Value="oClienteFormCLS.NombreCliente" />
+        <ValidationMessage For="@(() => oClienteFormCLS.NombreCliente)" />
+    </div>
+
+    <div class="mt-3">
+        <label>Representante Asignado</label>
+        <InputSelect class="form-control" @bind-Value="oClienteFormCLS.Num_Empl">
+            <option value="">-- Seleccione --</option>
+            @foreach (var empleado in listarEmpleados)
+            {
+                <option value="@empleado.Num_Empl">@empleado.Nombre</option>
+            }
+        </InputSelect>
+    </div>
+
+    <div class="mt-3">
+        <label>Limite de Credito</label>
+        <InputNumber class="form-control" @bind-Value="oClienteFormCLS.LimiteCredito" />
+        <ValidationMessage For="@(() => oClienteFormCLS.LimiteCredito)" />
+    </div>
+
+    <div class="mt-3">
+        <button type="submit" class="btn btn-success">Guardar</button>
+        <button type="button" class="btn btn-danger" @onclick="regresar">Regresar</button>
+    </div>
+</EditForm>
+
+@code {
+    public ClienteFormCLS oClienteFormCLS { get; set; } = new ClienteFormCLS();
+    [Parameter]
+    public int CodigoCliente { get; set; }
+    public string titulo { get; set; } = "";    
+    public List<EmpleadoListCLS> listarEmpleados { get; set; } = new List<EmpleadoListCLS>();
+    protected override Task OnInitializedAsync()
+    {
+        listarEmpleados = empleadoService.listarEmpleados();
+        if (CodigoCliente == 0) titulo= "Agregar Cliente";
+        else
+        {
+            titulo = "Editar Cliente";
+            oClienteFormCLS = clienteService.recuperarClientePorId(CodigoCliente);
+        } 
+        return base.OnInitializedAsync();
+    }   
+    private void guardar()
+    {
+        if (titulo == "Agregar Cliente")
+        {
+            clienteService.guardarCliente(oClienteFormCLS);
+            NavigationManager.NavigateTo("/cliente");
+        }
+    }
+    private void regresar()
+    {
+        NavigationManager.NavigateTo("/cliente");
+    }
+
+}
+

@@ -1,0 +1,21 @@
+﻿@inject EmpleadoService EmpleadoService
+<div class="input-group">
+    <input type="text" class="form-control" placeholder="Ingrese el nombre del Representante"
+           @bind-value="nombre" @bind-value:event="oninput" aria-label="Recipient's username" aria-describedby="basic-addon2">
+    <div class="input-group-append">
+        <button @onclick="buscar" class="btn btn-outline-dark" type="button">Buscar</button>
+        <button @onclick="limpiar" class="btn btn-outline-danger" type="button">Limpiar</button>
+    </div>
+</div>
+@code {
+    public string nombre { get; set; } = string.Empty;
+    private async Task limpiar()
+    {
+        nombre = string.Empty;
+        await EmpleadoService.notificarBusqueda(nombre);
+    }
+    private async Task buscar()
+    {
+        await EmpleadoService.notificarBusqueda(nombre);
+    }
+}
